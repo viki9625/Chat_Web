@@ -4,20 +4,31 @@ import './LoginPage.css';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
+  const [error, setError] = useState(''); // State to hold login error messages
   const { login } = useContext(AuthContext);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username.trim()) {
-      login(username.trim());
+    if (!username.trim()) {
+        setError("Username cannot be empty.");
+        return;
+    }
+    
+    try {
+      // Clear previous errors
+      setError('');
+      await login(username.trim());
+    } catch (err) {
+      // Set the error message from the AuthContext
+      setError(err.message);
     }
   };
 
   return (
     <div className="login-container">
       <div className="login-box">
-        <h2>Welcome to Chat</h2>
-        <p>Please enter your username to start.</p>
+        <h2>Welcome Back!</h2>
+        <p>Please sign in to continue.</p>
         <form onSubmit={handleSubmit}>
           <input
             type="text"
@@ -26,8 +37,12 @@ const LoginPage = () => {
             placeholder="Enter your username"
             className="login-input"
           />
+          
+          {/* Display the error message if it exists */}
+          {error && <p className="login-error">{error}</p>}
+          
           <button type="submit" className="login-button">
-            Enter Chat
+            Login
           </button>
         </form>
       </div>

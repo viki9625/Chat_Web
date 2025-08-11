@@ -18,12 +18,23 @@ const ChatPage = () => {
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
   const wsUrl = process.env.REACT_APP_WEBSOCKET_URL;
 
+  let usersAll;
+
   // Function to fetch both users and rooms
   const fetchData = useCallback(async () => {
     try {
-      const usersResponse = await axios.get(`${backendUrl}/users/`);
-      setUsers(usersResponse.data.filter(u => u.username !== user.username));
-      
+      const friendsResponse = await axios.get(`${backendUrl}/friends/${user.username}`);
+      const friendDocs = friendsResponse.data || [];
+
+      const friendUsernames = friendDocs.map(doc => {
+
+        return doc.from_user === user.username ? doc.to_user : doc.from_user;
+      });
+
+      const friendsList = friendUsernames.map(name => ({ username: name }));
+      setUsers(friendsList);
+
+      // Fetch rooms as before
       const roomsResponse = await axios.get(`${backendUrl}/rooms/`);
       setRooms(roomsResponse.data.rooms || []);
     } catch (error) {
@@ -34,7 +45,6 @@ const ChatPage = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
 
   // Fetch messages when activeChat changes
   useEffect(() => {

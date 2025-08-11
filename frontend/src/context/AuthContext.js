@@ -1,11 +1,9 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
-  // --- CHANGE 1: Initialize state from localStorage ---
-  // We check if a user is already saved in localStorage when the app loads.
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('chat_user');
     return savedUser ? JSON.parse(savedUser) : null;
@@ -13,26 +11,26 @@ const AuthProvider = ({ children }) => {
 
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
+  // --- THIS IS THE UPDATED LOGIN FUNCTION ---
   const login = async (username) => {
     try {
-      await axios.post(`${backendUrl}/user/`, { username });
-      console.log("User created or already exists.");
-    } catch (error) {
-      if (error.response && error.response.status !== 409) {
-        console.error("Login error:", error);
-        return;
-      }
-    }
-    const userData = { username };
-    setUser(userData);
+      // Call the new /login/ endpoint
+      const response = await axios.post(`${backendUrl}/login/`, { username });
+      
+      // On success, set the user and save to localStorage
+      const userData = response.data.user;
+      setUser(userData);
+      localStorage.setItem('chat_user', JSON.stringify(userData));
 
-    // --- CHANGE 2: Save the user to localStorage on login ---
-    localStorage.setItem('chat_user', JSON.stringify(userData));
+    } catch (error) {
+      // If login fails, re-throw the error to be handled by the component
+      console.error("Login failed:", error.response?.data?.detail || error.message);
+      throw new Error(error.response?.data?.detail || 'Login failed. Please try again.');
+    }
   };
 
   const logout = () => {
     setUser(null);
-    // --- CHANGE 3: Remove the user from localStorage on logout ---
     localStorage.removeItem('chat_user');
   };
 

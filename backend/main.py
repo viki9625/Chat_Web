@@ -57,6 +57,8 @@ class RoomCreate(BaseModel):
     creator: str
 class JoinRoomRequest(BaseModel):
     username: str
+class UserLogin(BaseModel):
+    username: str
 # ------------------- REAL-TIME CONNECTION MANAGER -------------------
 class ConnectionManager:
     def __init__(self):
@@ -83,6 +85,19 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 # ------------------- API ENDPOINTS -------------------
+@app.post("/login/")
+def login_user(user_login: UserLogin):
+    """
+    Logs a user in by checking if they exist in the database.
+    """
+    user = users_collection.find_one({"username": user_login.username})
+    if not user:
+        raise HTTPException(
+            status_code=404, 
+            detail="User not found. Please enter a valid username."
+        )
+    return {"msg": "Login successful", "user": {"username": user_login.username}}
+
 @app.post("/user/")
 def create_user(user: User):
     if users_collection.find_one({"username": user.username}):
