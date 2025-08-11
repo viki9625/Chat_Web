@@ -1,0 +1,10 @@
+.chat-page-container {
+  display: flex;
+  width: 90vw;
+  height: 90vh;
+  max-width: 1600px;
+  background-color: var(--background-color);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}

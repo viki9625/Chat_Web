@@ -1,0 +1,30 @@
+:root {
+  --background-color: #ffffff;
+  --secondary-bg: #F7F9FC;
+  --sidebar-bg: #ffffff;
+  --accent-color: #26D5A8;
+  --accent-hover: #18b38d;
+  --text-primary: #121212;
+  --text-secondary: #7A869A;
+  --border-color: #E9EFF5;
+  --sent-bubble-bg: #26D5A8;
+  --received-bubble-bg: #F1F3F4;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #E5E9F2; /* The outer background */
+}
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
