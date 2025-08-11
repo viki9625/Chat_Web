@@ -1,5 +1,6 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import CreateRoomModal from './CreateRoomModal';
 import './Sidebar.css';
 
 // A simple placeholder for a logo or main icon
@@ -13,9 +14,9 @@ const AppLogo = () => (
 );
 
 
-const Sidebar = ({ users, onSelectChat, activeChat }) => {
+const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom }) => {
     const { user, logout } = useContext(AuthContext);
-
+    
     return (
         <div className="sidebar">
             <div className="sidebar-header">
@@ -37,27 +38,47 @@ const Sidebar = ({ users, onSelectChat, activeChat }) => {
                 <input type="text" placeholder="Search" />
             </div>
 
+            {/* --- Private Chats --- */}
             <div className="chat-list-header">
-                <h4>Last chats</h4>
-                <button>+</button>
+                <h4>Chats</h4>
             </div>
-
             <div className="chat-list">
                 {users.map((u) => (
                     <div
                         key={u.username}
-                        className={`chat-item ${activeChat === u.username ? 'active' : ''}`}
-                        onClick={() => onSelectChat(u.username)}
+                        className={`chat-item ${activeChat?.id === u.username ? 'active' : ''}`}
+                        onClick={() => onSelectChat({id: u.username, name: u.username, type: 'private'})}
                     >
                         <div className="avatar">{u.username.charAt(0).toUpperCase()}</div>
                         <div className="chat-details">
                             <div className="chat-name">{u.username}</div>
-                            <div className="chat-preview">Click to start chatting...</div>
+                            <div className="chat-preview">Private Message</div>
                         </div>
-                        <div className="chat-timestamp">11:15</div>
                     </div>
                 ))}
             </div>
+
+            {/* --- Group Chats --- */}
+            <div className="chat-list-header">
+                <h4>Group Chats</h4>
+                <button onClick={onNewRoom}>+</button>
+            </div>
+            <div className="chat-list">
+                {rooms.map((room) => (
+                    <div
+                        key={room.name}
+                        className={`chat-item ${activeChat?.id === room.name ? 'active' : ''}`}
+                        onClick={() => onSelectChat({id: room.name, name: room.name, type: 'room'})}
+                    >
+                        <div className="avatar">#</div>
+                        <div className="chat-details">
+                            <div className="chat-name">{room.name}</div>
+                            <div className="chat-preview">{room.members.length} members</div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
         </div>
     );
 };

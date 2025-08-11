@@ -9,6 +9,7 @@ const ChatWindow = ({ activeChat, messages, setMessages }) => {
   const { user } = useContext(AuthContext);
   const messagesEndRef = useRef(null);
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
+  const ws = new WebSocket(`${process.env.REACT_APP_WEBSOCKET_URL}/ws/${user.username}`);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -20,24 +21,35 @@ const ChatWindow = ({ activeChat, messages, setMessages }) => {
     e.preventDefault();
     if (!text.trim() || !activeChat) return;
 
-    const messageData = {
-      sender: user.username,
-      receiver: activeChat,
-      text: text,
-    };
+    let messageData = {};
+    let url = '';
 
+    if (activeChat.type === 'private') {
+        url = `${backendUrl}/private-message/`;
+        messageData = { sender: user.username, receiver: activeChat.id, text };
+    } else if (activeChat.type === 'room') {
+        url = `${backendUrl}/room-message/`;
+        messageData = { username: user.username, room: activeChat.id, text };
+    }
+    
+    // Optimistic UI update
+    const optimisticMessage = activeChat.type === 'private'
+      ? { sender: user.username, receiver: activeChat.id, text, timestamp: new Date().toISOString() }
+      : { username: user.username, room: activeChat.id, text, timestamp: new Date().toISOString(), sender: user.username };
+    
+    setMessages(prev => [...prev, optimisticMessage]);
+    
+    // Send to WebSocket for real-time broadcast
+    ws.send(JSON.stringify({ type: activeChat.type, ...optimisticMessage }));
+    
+    setText('');
+    
+    // Persist to DB
     try {
-      await axios.post(`${backendUrl}/private-message/`, messageData);
-      
-      const optimisticMessage = {
-          ...messageData,
-          timestamp: new Date().toISOString(),
-      };
-      setMessages([...messages, optimisticMessage]);
-      setText('');
-
+      await axios.post(url, messageData);
     } catch (error) {
       console.error("Failed to send message:", error);
+      // Optional: Add logic to remove the optimistic message on failure
     }
   };
 
@@ -45,7 +57,7 @@ const ChatWindow = ({ activeChat, messages, setMessages }) => {
     return (
         <div className="chat-window-placeholder">
             <h2>Select a conversation to begin</h2>
-            <p>You can start a new chat by selecting a user from the list on the left.</p>
+            <p>You can start a new chat by selecting a user or group from the list on the left.</p>
         </div>
     );
   }
@@ -53,11 +65,11 @@ const ChatWindow = ({ activeChat, messages, setMessages }) => {
   return (
     <div className="chat-window">
       <div className="chat-header">
-        <h3>{activeChat}</h3>
+        <h3>{activeChat.name}</h3>
       </div>
       <div className="message-list">
         {messages.map((msg, index) => (
-          <Message key={index} message={msg} />
+          <Message key={index} message={msg} chatType={activeChat.type} />
         ))}
         <div ref={messagesEndRef} />
       </div>

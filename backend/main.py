@@ -51,7 +51,12 @@ class RoomMessage(BaseModel):
     username: str
     room: str
     text: str
-
+# Add this with your other Pydantic models
+class RoomCreate(BaseModel):
+    name: str
+    creator: str
+class JoinRoomRequest(BaseModel):
+    username: str
 # ------------------- REAL-TIME CONNECTION MANAGER -------------------
 class ConnectionManager:
     def __init__(self):
@@ -160,11 +165,20 @@ def get_friends(username: str):
     return list(friends)
 
 @app.post("/room/")
-def create_room(room_name: str):
-    if rooms_collection.find_one({"name": room_name}):
+def create_room(room: RoomCreate):
+    if rooms_collection.find_one({"name": room.name}):
         raise HTTPException(status_code=409, detail="Room already exists")
-    rooms_collection.insert_one({"name": room_name})
-    return {"msg": "Room created"}
+    if not users_collection.find_one({"username": room.creator}):
+        raise HTTPException(status_code=404, detail="Creator not found")
+
+    # Create the room with the creator as the first member
+    room_data = {
+        "name": room.name,
+        "created_at": datetime.utcnow(),
+        "members": [room.creator]
+    }
+    rooms_collection.insert_one(room_data)
+    return {"msg": "Room created successfully", "room": room.name}
 
 @app.post("/room-message/")
 def send_room_message(msg: RoomMessage):
@@ -194,10 +208,77 @@ async def websocket_endpoint(websocket: WebSocket, username: str):
     try:
         while True:
             data = await websocket.receive_json()
-            # Handle incoming messages from this user
-            if data["type"] == "public":
-                await manager.broadcast({"event": "public_message", "data": data})
-            elif data["type"] == "private":
-                await manager.send_personal_message({"event": "private_message", "data": data}, data["receiver"])
+            
+            if data["type"] == "private":
+                # This part is for one-on-one messages
+                await manager.send_personal_message(
+                    {"event": "private_message", "data": data}, 
+                    data["receiver"]
+                )
+            elif data["type"] == "room":
+                # This new part handles broadcasting room messages
+                room_name = data["room"]
+                room = rooms_collection.find_one({"name": room_name})
+                if room and data["sender"] in room["members"]:
+                    # Create the message data to broadcast
+                    event_data = {
+                        "event": "room_message",
+                        "data": data
+                    }
+                    # Send the message to all members of the room
+                    for member_username in room["members"]:
+                        # Don't send the message back to the original sender
+                        if member_username != data["sender"]:
+                            await manager.send_personal_message(event_data, member_username)
+
     except WebSocketDisconnect:
         manager.disconnect(username)
+    except Exception as e:
+        print(f"Error in websocket for {username}: {e}")
+        manager.disconnect(username)
+# Replace your old /room/ endpoint with this one
+@app.post("/room/")
+def create_room(room: RoomCreate):
+    if rooms_collection.find_one({"name": room.name}):
+        raise HTTPException(status_code=409, detail="Room already exists")
+    if not users_collection.find_one({"username": room.creator}):
+        raise HTTPException(status_code=404, detail="Creator not found")
+        
+    # Create the room with the creator as the first member
+    room_data = {
+        "name": room.name,
+        "created_at": datetime.utcnow(),
+        "members": [room.creator]
+    }
+    rooms_collection.insert_one(room_data)
+    return {"msg": "Room created successfully", "room": room.name}
+
+@app.get("/rooms/")
+def list_rooms():
+    """Returns a list of all available rooms."""
+    all_rooms = list(rooms_collection.find({}, {"_id": 0}))
+    return {"rooms": all_rooms}
+
+@app.post("/rooms/{room_name}/join")
+def join_room(room_name: str, request: JoinRoomRequest):
+    """Adds a user to a room's member list."""
+    # Check if the room exists
+    room = rooms_collection.find_one({"name": room_name})
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+        
+    # Check if the user exists
+    if not users_collection.find_one({"username": request.username}):
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Use MongoDB's $addToSet to add the user to the members array
+    # This prevents duplicate entries automatically.
+    result = rooms_collection.update_one(
+        {"name": room_name},
+        {"$addToSet": {"members": request.username}}
+    )
+
+    if result.modified_count > 0:
+        return {"msg": f"User '{request.username}' successfully joined room '{room_name}'"}
+    else:
+        return {"msg": f"User '{request.username}' is already a member of room '{room_name}'"}
