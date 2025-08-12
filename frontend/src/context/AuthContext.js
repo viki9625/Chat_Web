@@ -50,9 +50,10 @@ const AuthProvider = ({ children }) => {
     }
   };
   
-  const login = async (email, password) => {
+  const login = async (identifier, password) => {
     try {
-      const response = await axios.post(`${backendUrl}/login/`, { email, password });
+      // Send 'identifier' instead of 'email'
+      const response = await axios.post(`${backendUrl}/login/`, { identifier, password });
       handleAuthSuccess(response.data.user);
     } catch (error) {
       console.error("Login failed:", error.response?.data?.detail);

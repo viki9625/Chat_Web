@@ -70,7 +70,7 @@ class RoomCreate(BaseModel):
 class JoinRoomRequest(BaseModel):
     username: str
 class UserLogin(BaseModel):
-    email: EmailStr
+    identifier: str  # This field will accept either username or email
     password: str
 class GoogleLoginData(BaseModel):
     email: EmailStr
@@ -115,16 +115,24 @@ def create_user(user: UserCreate):
 
 @app.post("/login/")
 def login_user(user_login: UserLogin):
-    """Logs a user in by verifying their email and password."""
-    db_user = users_collection.find_one({"email": user_login.email})
-    if not db_user or not verify_password(user_login.password, db_user["hashed_password"]):
+    """
+    Logs a user in by verifying their identifier (email or username) and password.
+    """
+    # Check if the identifier is an email or a username
+    if "@" in user_login.identifier:
+        db_user = users_collection.find_one({"email": user_login.identifier})
+    else:
+        db_user = users_collection.find_one({"username": user_login.identifier})
+
+    # Verify user existence and password
+    if not db_user or not db_user.get("hashed_password") or not verify_password(user_login.password, db_user["hashed_password"]):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect username, email, or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+        
     return {"msg": "Login successful", "user": {"username": db_user["username"], "email": db_user["email"]}}
-
 @app.post("/google-login/")
 def google_login(data: GoogleLoginData):
     """
