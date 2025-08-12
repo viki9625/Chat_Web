@@ -2,7 +2,7 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--background-color);
+  background-color: transparent; /* Updated for dark theme consistency */
 }
 
 .chat-window-placeholder {
@@ -12,57 +12,63 @@
     align-items: center;
     justify-content: center;
     text-align: center;
-    color: var(--text-secondary);
+    color: #aebac1;
     padding: 20px;
 }
 
+/* --- THIS SECTION CONTAINS THE FIX --- */
 .chat-header {
   padding: 20px 30px;
-  border-bottom: 1px solid var(--border-color);
+  /* The border-bottom is now removed for a cleaner look */
+  border-bottom: none; 
   display: flex;
   align-items: center;
-  background-color: var(--background-color);
+  background-color: transparent;
 }
+/* --- END OF FIX SECTION --- */
+
 .chat-header h3 {
   margin: 0;
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #e9edef;
 }
 
-/* This is the key property for the layout */
 .message-list {
   flex-grow: 1;
   padding: 20px 30px;
   overflow-y: auto;
-  background-color: var(--secondary-bg);
+  background-color: transparent;
 }
 
 .message-input-form {
   display: flex;
   padding: 20px 30px;
   align-items: center;
-  background-color: var(--background-color);
-  border-top: 1px solid var(--border-color);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 .message-input-form input {
   flex-grow: 1;
   border: none;
-  background-color: var(--secondary-bg);
+  background-color: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
-  padding: 18px 25px;
+  padding: 15px 20px;
   font-size: 15px;
   margin-right: 15px;
   outline: none;
-  color: var(--text-primary);
+  color: #fff;
+}
+.message-input-form input::placeholder {
+    color: #aebac1;
 }
 .send-button {
   background-color: var(--accent-color);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   cursor: pointer;
   display: flex;
   align-items: center;

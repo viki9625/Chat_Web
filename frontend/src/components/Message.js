@@ -13,7 +13,12 @@ const Message = ({ message, chatType }) => {
     <div className={`message-container ${messageClass}`}>
       {!isSentByCurrentUser && <div className="avatar">{sender.charAt(0).toUpperCase()}</div>}
       <div className="message-content">
-        {chatType === 'room' && !isSentByCurrentUser && <div className="sender-name">{sender}</div>}
+        {/* --- THIS IS THE NEW LOGIC --- */}
+        {/* If it's a room chat and the message is from someone else, show their name */}
+        {chatType === 'room' && !isSentByCurrentUser && (
+            <div className="sender-name">{sender}</div>
+        )}
+        {/* --- END OF NEW LOGIC --- */}
         <div className="message-bubble">
           {message.text}
         </div>

@@ -2,7 +2,7 @@
   display: flex;
   margin-bottom: 25px;
   position: relative;
-  align-items: flex-end;
+  align-items: flex-start; /* Align items to the top */
   gap: 15px;
 }
 
@@ -13,25 +13,29 @@
 }
 
 .message-bubble {
-  padding: 15px 20px;
+  padding: 12px 18px;
   border-radius: 18px;
   word-wrap: break-word;
   line-height: 1.5;
+  font-size: 15px;
 }
 
+/* --- THIS IS THE FIX --- */
 .sender-name {
-    color: var(--text-primary);
+    color: #34d399; /* A vibrant, readable green color */
     font-weight: 600;
     font-size: 14px;
     margin-bottom: 8px;
+    margin-left: 5px; /* Small indent for alignment */
 }
+/* --- END OF FIX --- */
 
 /* Sent messages (by current user) */
 .message-container.sent {
   justify-content: flex-end;
 }
 .sent .message-bubble {
-  background-color: var(--sent-bubble-bg);
+  background-color: var(--accent-color);
   color: white;
   border-bottom-right-radius: 4px;
 }
@@ -41,8 +45,8 @@
   justify-content: flex-start;
 }
 .received .message-bubble {
-  background-color: var(--received-bubble-bg);
-  color: var(--text-primary);
+  background-color: #2a3942; /* Darker bubble for contrast */
+  color: #e9edef;
   border-bottom-left-radius: 4px;
 }
 .received .avatar {
@@ -50,6 +54,6 @@
     height: 40px;
     font-size: 16px;
     font-weight: 600;
-    background-color: #AAB2C3;
+    background-color: #aab2c3;
     color: white;
 }
