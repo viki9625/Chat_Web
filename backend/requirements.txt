@@ -1,6 +1,7 @@
 fastapi
-uvicorn
-python-socketio
-motor
-python-dotenv
+uvicorn[standard]
 pydantic
+pymongo
+python-dotenv
+passlib[bcrypt]
+python-multipart
