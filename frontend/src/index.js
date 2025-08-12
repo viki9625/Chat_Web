@@ -9,11 +9,9 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 
 root.render(
-  <React.StrictMode>
     <GoogleOAuthProvider clientId={googleClientId}>
       <AuthProvider>
         <App />
       </AuthProvider>
     </GoogleOAuthProvider>
-  </React.StrictMode>
 );

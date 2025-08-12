@@ -4,23 +4,30 @@ import './Message.css';
 
 const Message = ({ message, chatType }) => {
   const { user } = useContext(AuthContext);
-  // The 'sender' field might be named 'username' in room messages
   const sender = message.sender || message.username; 
   const isSentByCurrentUser = sender === user.username;
   const messageClass = isSentByCurrentUser ? 'sent' : 'received';
+
+  // Helper function to format the timestamp into HH:MM AM/PM
+  const formatTimestamp = (isoString) => {
+    if (!isoString) return '';
+    return new Date(isoString).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
 
   return (
     <div className={`message-container ${messageClass}`}>
       {!isSentByCurrentUser && <div className="avatar">{sender.charAt(0).toUpperCase()}</div>}
       <div className="message-content">
-        {/* --- THIS IS THE NEW LOGIC --- */}
-        {/* If it's a room chat and the message is from someone else, show their name */}
         {chatType === 'room' && !isSentByCurrentUser && (
             <div className="sender-name">{sender}</div>
         )}
-        {/* --- END OF NEW LOGIC --- */}
         <div className="message-bubble">
-          {message.text}
+            <span className="message-text">{message.text}</span>
+            <span className="message-timestamp">{formatTimestamp(message.timestamp)}</span>
         </div>
       </div>
     </div>

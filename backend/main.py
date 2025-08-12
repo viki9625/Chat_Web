@@ -228,11 +228,13 @@ def add_friend(req: FriendRequest):
 
 @app.post("/friend-accept/")
 def accept_friend(req: FriendRequest):
+    """Accepts a friend request by finding the request and setting accepted to True."""
     result = friends_collection.update_one(
-        {"from_user": req.to_user, "to_user": req.from_user}, {"$set": {"accepted": True}}
+        {"from_user": req.from_user, "to_user": req.to_user, "accepted": False}, 
+        {"$set": {"accepted": True}}
     )
     if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Friend request not found")
+        raise HTTPException(status_code=404, detail="Friend request not found to accept.")
     return {"msg": "Friend request accepted"}
 
 @app.get("/friend-requests/pending/{username}")
@@ -242,18 +244,21 @@ def get_pending_requests(username: str):
         {"to_user": username, "accepted": False}, 
         {"_id": 0}
     ))
+    # It's okay if this returns an empty list, it shouldn't be a 404 error.
     return requests
+
 
 @app.post("/friend-decline/")
 def decline_friend(req: FriendRequest):
     """Declines/rejects a friend request by deleting it."""
+    # CORRECT LOGIC: Find the request where the sender is 'from_user'
+    # and the current user is 'to_user'.
     result = friends_collection.delete_one(
-        {"from_user": req.to_user, "to_user": req.from_user, "accepted": False}
+        {"from_user": req.from_user, "to_user": req.to_user, "accepted": False}
     )
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Friend request not found to decline.")
     return {"msg": "Friend request declined"}
-
 @app.get("/friends/{username}")
 def get_friends(username: str):
     friends = friends_collection.find({"$or": [

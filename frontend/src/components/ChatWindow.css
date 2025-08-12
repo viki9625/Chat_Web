@@ -78,3 +78,18 @@
 .send-button:hover {
     background-color: var(--accent-hover);
 }
+.date-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.date-separator span {
+    background-color: #2a3942; /* A slightly different background */
+    color: #aebac1;
+    padding: 5px 15px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}

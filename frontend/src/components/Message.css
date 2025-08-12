@@ -1,9 +1,13 @@
 .message-container {
   display: flex;
-  margin-bottom: 25px;
+  margin-bottom: 5px; /* Reduced margin for tighter groups */
   position: relative;
-  align-items: flex-start; /* Align items to the top */
+  align-items: flex-start;
   gap: 15px;
+}
+
+.message-container:first-of-type {
+    margin-top: 15px;
 }
 
 .message-content {
@@ -13,26 +17,39 @@
 }
 
 .message-bubble {
-  padding: 12px 18px;
+  padding: 8px 12px;
   border-radius: 18px;
   word-wrap: break-word;
-  line-height: 1.5;
+  line-height: 1.4;
   font-size: 15px;
+  position: relative;
+  display: flex;
+  align-items: flex-end; /* Align text and time */
+  gap: 15px; /* Space between text and time */
 }
 
-/* --- THIS IS THE FIX --- */
+.message-text {
+    /* Text can now wrap naturally */
+}
+
+.message-timestamp {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    white-space: nowrap; /* Prevent time from wrapping */
+}
+
 .sender-name {
-    color: #34d399; /* A vibrant, readable green color */
+    color: #34d399;
     font-weight: 600;
     font-size: 14px;
     margin-bottom: 8px;
-    margin-left: 5px; /* Small indent for alignment */
+    margin-left: 5px;
 }
-/* --- END OF FIX --- */
 
 /* Sent messages (by current user) */
 .message-container.sent {
   justify-content: flex-end;
+  margin-bottom: 15px; /* Add margin between consecutive sent messages */
 }
 .sent .message-bubble {
   background-color: var(--accent-color);
@@ -45,7 +62,7 @@
   justify-content: flex-start;
 }
 .received .message-bubble {
-  background-color: #2a3942; /* Darker bubble for contrast */
+  background-color: #2a3942;
   color: #e9edef;
   border-bottom-left-radius: 4px;
 }

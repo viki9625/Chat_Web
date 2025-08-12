@@ -4,13 +4,34 @@ import { AuthContext } from '../context/AuthContext';
 import Message from './Message';
 import './ChatWindow.css';
 
+// Helper function to format the date for the separator
+const formatDateSeparator = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (date.toDateString() === today.toDateString()) {
+        return 'Today';
+    }
+    if (date.toDateString() === yesterday.toDateString()) {
+        return 'Yesterday';
+    }
+    return date.toLocaleDateString([], {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+};
+
+
 const ChatWindow = ({ activeChat, messages, setMessages }) => {
   const [text, setText] = useState('');
   const { user, ws } = useContext(AuthContext);
   const messagesEndRef = useRef(null);
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -52,9 +73,30 @@ const ChatWindow = ({ activeChat, messages, setMessages }) => {
         <h3>{activeChat.name}</h3>
       </div>
       <div className="message-list">
-        {messages.map((msg, index) => (
-          <Message key={index} message={msg} chatType={activeChat.type} />
-        ))}
+        {/* --- NEW LOGIC TO RENDER MESSAGES WITH DATE SEPARATORS --- */}
+        {messages.map((msg, index) => {
+            let showDateSeparator = false;
+            if (index === 0) {
+                showDateSeparator = true;
+            } else {
+                const prevDate = new Date(messages[index - 1].timestamp).toDateString();
+                const currDate = new Date(msg.timestamp).toDateString();
+                if (prevDate !== currDate) {
+                    showDateSeparator = true;
+                }
+            }
+            
+            return (
+                <React.Fragment key={index}>
+                    {showDateSeparator && (
+                        <div className="date-separator">
+                            <span>{formatDateSeparator(msg.timestamp)}</span>
+                        </div>
+                    )}
+                    <Message message={msg} chatType={activeChat.type} />
+                </React.Fragment>
+            );
+        })}
         <div ref={messagesEndRef} />
       </div>
       <form className="message-input-form" onSubmit={handleSendMessage}>
@@ -65,10 +107,7 @@ const ChatWindow = ({ activeChat, messages, setMessages }) => {
           placeholder="Write your message..."
         />
         <button type="submit" className="send-button">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            {/* ... SVG Icon ... */}
         </button>
       </form>
     </div>
