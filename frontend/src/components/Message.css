@@ -1,6 +1,6 @@
 .message-container {
   display: flex;
-  margin-bottom: 5px; /* Reduced margin for tighter groups */
+  margin-bottom: 5px;
   position: relative;
   align-items: flex-start;
   gap: 15px;
@@ -24,22 +24,23 @@
   font-size: 15px;
   position: relative;
   display: flex;
-  align-items: flex-end; /* Align text and time */
-  gap: 15px; /* Space between text and time */
+  align-items: flex-end;
+  gap: 15px;
 }
 
 .message-text {
-    /* Text can now wrap naturally */
+    /* No specific styles needed */
 }
 
 .message-timestamp {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
-    white-space: nowrap; /* Prevent time from wrapping */
+    color: rgba(255, 255, 255, 0.7); /* Lighter time for better contrast */
+    white-space: nowrap;
 }
 
+/* --- NEW USERNAME COLOR --- */
 .sender-name {
-    color: #34d399;
+    color: #c084fc; /* Vibrant light purple for usernames */
     font-weight: 600;
     font-size: 14px;
     margin-bottom: 8px;
@@ -49,10 +50,11 @@
 /* Sent messages (by current user) */
 .message-container.sent {
   justify-content: flex-end;
-  margin-bottom: 15px; /* Add margin between consecutive sent messages */
+  margin-bottom: 15px;
 }
 .sent .message-bubble {
-  background-color: var(--accent-color);
+  /* This now uses the new color from App.css */
+  background-color: var(--sent-bubble-bg); 
   color: white;
   border-bottom-right-radius: 4px;
 }

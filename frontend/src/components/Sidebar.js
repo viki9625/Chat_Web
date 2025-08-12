@@ -2,16 +2,13 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import './Sidebar.css';
 
-
-const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingRequestsCount, onOpenFriendModal, onDataRefresh }) => {
+const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingRequestsCount, onOpenFriendModal }) => {
     const { user, logout } = useContext(AuthContext);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     
     const formatPreviewTime = (isoString) => {
         if (!isoString) return '';
-        const date = new Date(isoString);
-        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+        return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
     };
 
     return (
@@ -27,12 +24,8 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
             </div>
 
             <div className="profile-section">
-                <div className="profile-avatar clickable" onClick={() => setIsUploadModalOpen(true)} title="Change Profile Picture">
-                    {user.profile_image_url ? (
-                        <img src={user.profile_image_url} alt={user.username} />
-                    ) : (
-                        user.username.charAt(0).toUpperCase()
-                    )}
+                <div className="profile-avatar">
+                    {user.username.charAt(0).toUpperCase()}
                 </div>
                 <div className="profile-info">
                     <h4>{user.username}</h4>
@@ -59,11 +52,7 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
                     {users.map((chat) => (
                         <div key={chat.friend_username} className={`chat-item ${activeChat?.id === chat.friend_username ? 'active' : ''}`} onClick={() => onSelectChat({id: chat.friend_username, name: chat.friend_username, type: 'private'})}>
                             <div className="avatar">
-                                {chat.profile_image_url ? (
-                                    <img src={chat.profile_image_url} alt={chat.friend_username} />
-                                ) : (
-                                    chat.friend_username.charAt(0).toUpperCase()
-                                )}
+                                {chat.friend_username.charAt(0).toUpperCase()}
                             </div>
                             <div className="chat-details">
                                 <div className="chat-name">{chat.friend_username}</div>
@@ -84,11 +73,7 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
                     {rooms.map((room) => (
                         <div key={room.name} className={`chat-item ${activeChat?.id === room.name ? 'active' : ''}`} onClick={() => onSelectChat({id: room.name, name: room.name, type: 'room'})}>
                             <div className="avatar">
-                                {room.room_image_url ? (
-                                    <img src={room.room_image_url} alt={room.name} />
-                                ) : (
-                                    '#'
-                                )}
+                                {'#'}
                             </div>
                             <div className="chat-details">
                                 <div className="chat-name">{room.name}</div>

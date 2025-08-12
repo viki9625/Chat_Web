@@ -356,9 +356,20 @@ def create_room(room: RoomCreate):
     rooms_collection.insert_one(room_data)
     return {"msg": "Room created successfully", "room": room.name}
 
+@app.get("/rooms/{username}")
+def list_rooms(username: str):
+    """Returns a list of all rooms that the specified user is a member of."""
+    
+    # This new query finds documents where the 'members' array contains the username
+    user_rooms = list(rooms_collection.find(
+        {"members": username}, 
+        {"_id": 0}
+    ))
+    return {"rooms": user_rooms}
+
 @app.get("/rooms/")
-def list_rooms():
-    """Returns a list of all available rooms."""
+def list_all_rooms():
+    """Returns a list of all rooms available on the server."""
     all_rooms = list(rooms_collection.find({}, {"_id": 0}))
     return {"rooms": all_rooms}
 

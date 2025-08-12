@@ -3,14 +3,14 @@ import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
-import CreateRoomModal from '../components/CreateRoomModal';
 import FriendManagementModal from '../components/FriendManagementModal';
 import RoomManagementModal from '../components/RoomManagementModal';
 import './ChatPage.css';
 
 const ChatPage = () => {
     const [users, setUsers] = useState([]);
-    const [rooms, setRooms] = useState([]);
+    const [joinedRooms, setJoinedRooms] = useState([]);
+    const [allRooms, setAllRooms] = useState([]);
     const [activeChat, setActiveChat] = useState(null);
     const [messages, setMessages] = useState([]);
     const [pendingRequests, setPendingRequests] = useState([]);
@@ -20,29 +20,28 @@ const ChatPage = () => {
 
     const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
-const fetchData = useCallback(async () => {
-    if (!user) return;
-    try {
-      // --- THIS IS THE UPDATED PART ---
-      // Call the new endpoint that includes last message data
-      const chatsResponse = await axios.get(`${backendUrl}/chats/${user.username}`);
-      setUsers(chatsResponse.data || []); // The 'users' state will now hold the full chat objects
+    const fetchData = useCallback(async () => {
+        if (!user) return;
+        try {
+            const chatsResponse = await axios.get(`${backendUrl}/chats/${user.username}`);
+            setUsers(chatsResponse.data || []);
 
-      // --- END OF UPDATE ---
+            const joinedRoomsResponse = await axios.get(`${backendUrl}/rooms/${user.username}`);
+            setJoinedRooms(joinedRoomsResponse.data.rooms || []);
 
-      // Fetch rooms and pending requests as before
-      const roomsResponse = await axios.get(`${backendUrl}/rooms/`);
-      setRooms(roomsResponse.data.rooms || []);
+            const allRoomsResponse = await axios.get(`${backendUrl}/rooms/`);
+            setAllRooms(allRoomsResponse.data.rooms || []);
 
-      const requestsResponse = await axios.get(`${backendUrl}/friend-requests/pending/${user.username}`);
-      setPendingRequests(requestsResponse.data || []);
+            const requestsResponse = await axios.get(`${backendUrl}/friend-requests/pending/${user.username}`);
+            setPendingRequests(requestsResponse.data || []);
 
-    } catch (error) {
-      if (error.response?.status !== 404) {
-           console.error("Failed to fetch data:", error);
-      }
-    }
-  }, [user, backendUrl]);
+        } catch (error) {
+            if (error.response?.status !== 404) {
+                console.error("Failed to fetch data:", error);
+            }
+        }
+    }, [user, backendUrl]);
+
     useEffect(() => {
         fetchData();
     }, [fetchData]);
@@ -50,7 +49,7 @@ const fetchData = useCallback(async () => {
     useEffect(() => {
         const fetchMessages = async () => {
             if (!activeChat) return;
-            setMessages([]); // Clear previous messages when chat changes
+            setMessages([]);
             let url = '';
             if (activeChat.type === 'private') {
                 url = `${backendUrl}/private-messages/${activeChat.id}?sender=${user.username}`;
@@ -60,32 +59,23 @@ const fetchData = useCallback(async () => {
             try {
                 const response = await axios.get(url);
                 setMessages(response.data.messages || []);
-            } catch (error) { 
-                console.error("Failed to fetch messages:", error); 
-                setMessages([]); // Ensure messages are empty on failure
-            }
+            } catch (error) { console.error("Failed to fetch messages:", error); setMessages([]); }
         };
         fetchMessages();
     }, [activeChat, user.username, backendUrl]);
     
-    // Sets up the message listener on the single WebSocket instance from context
     useEffect(() => {
         if (!ws) return;
-
         const handleMessage = (event) => {
             const received = JSON.parse(event.data);
             const msgData = received.data;
-
             if (received.event === 'private_message' && activeChat?.type === 'private' && (msgData.sender === activeChat.id || msgData.receiver === activeChat.id)) {
                 setMessages(prev => [...prev, msgData]);
             } else if (received.event === 'room_message' && activeChat?.type === 'room' && msgData.room === activeChat.id) {
                 setMessages(prev => [...prev, msgData]);
             }
         };
-        
         ws.addEventListener('message', handleMessage);
-
-        // Cleanup listener when the component unmounts or dependencies change
         return () => {
             ws.removeEventListener('message', handleMessage);
         };
@@ -97,23 +87,23 @@ const fetchData = useCallback(async () => {
     
     return (
         <div className="chat-page-container">
-            {isRoomModalOpen && <CreateRoomModal 
-                rooms={rooms}
+            {isRoomModalOpen && <RoomManagementModal 
+                allRooms={allRooms}
                 onClose={() => setIsRoomModalOpen(false)}
-                onRoomCreated={fetchData} 
+                onActionSuccess={fetchData} 
             />}
             {isFriendModalOpen && <FriendManagementModal 
                 pendingRequests={pendingRequests}
                 onClose={() => setIsFriendModalOpen(false)}
                 onAction={() => {
-                    fetchData(); // Refetch all data after accepting/declining
+                    fetchData();
                     setIsFriendModalOpen(false);
                 }}
             />}
 
             <Sidebar 
                 users={users} 
-                rooms={rooms}
+                rooms={joinedRooms}
                 onSelectChat={handleSelectChat} 
                 activeChat={activeChat}
                 onNewRoom={() => setIsRoomModalOpen(true)}

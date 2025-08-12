@@ -2,7 +2,7 @@
   flex-grow: 1;
   display: flex;
   flex-direction: column;
-  background-color: transparent; /* Updated for dark theme consistency */
+  background-color: transparent;
 }
 
 .chat-window-placeholder {
@@ -16,17 +16,13 @@
     padding: 20px;
 }
 
-/* --- THIS SECTION CONTAINS THE FIX --- */
 .chat-header {
   padding: 20px 30px;
-  /* The border-bottom is now removed for a cleaner look */
   border-bottom: none; 
   display: flex;
   align-items: center;
   background-color: transparent;
 }
-/* --- END OF FIX SECTION --- */
-
 .chat-header h3 {
   margin: 0;
   font-size: 18px;
@@ -34,12 +30,16 @@
   color: #e9edef;
 }
 
+/* --- THIS SECTION CONTAINS THE FIX --- */
 .message-list {
   flex-grow: 1;
   padding: 20px 30px;
   overflow-y: auto;
-  background-color: transparent;
+  background-image: url('/img/Black.jpg'); /* Your new background image */
+  background-size: cover; /* Ensures the image covers the whole area */
+  background-position: center; /* Centers the image */
 }
+/* --- END OF FIX --- */
 
 .message-input-form {
   display: flex;
@@ -78,15 +78,15 @@
 .send-button:hover {
     background-color: var(--accent-hover);
 }
+
 .date-separator {
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 20px 0;
 }
-
 .date-separator span {
-    background-color: #2a3942; /* A slightly different background */
+    background-color: #2a3942;
     color: #aebac1;
     padding: 5px 15px;
     border-radius: 12px;

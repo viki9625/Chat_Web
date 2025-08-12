@@ -1,10 +1,10 @@
 import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import './CreateRoomModal.css'; // We will create this CSS file next
+import './CreateRoomModal.css';
 
-const RoomManagementModal = ({ rooms, onClose, onActionSuccess }) => {
-    const [activeTab, setActiveTab] = useState('create'); // 'create' or 'join'
+const RoomManagementModal = ({ allRooms, onClose, onActionSuccess }) => {
+    const [activeTab, setActiveTab] = useState('create');
     const [roomName, setRoomName] = useState('');
     const [selectedRoom, setSelectedRoom] = useState('');
     const [error, setError] = useState('');
@@ -12,10 +12,10 @@ const RoomManagementModal = ({ rooms, onClose, onActionSuccess }) => {
     const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
     useEffect(() => {
-        if (rooms && rooms.length > 0) {
-            setSelectedRoom(rooms[0].name);
+        if (allRooms && allRooms.length > 0) {
+            setSelectedRoom(allRooms[0].name);
         }
-    }, [rooms]);
+    }, [allRooms]);
 
     const handleCreateRoom = async (e) => {
         e.preventDefault();
@@ -76,8 +76,8 @@ const RoomManagementModal = ({ rooms, onClose, onActionSuccess }) => {
                     <form onSubmit={handleJoinRoom} className="modal-form">
                         <h2>Join Existing Group</h2>
                         <select value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)}>
-                            {rooms.length > 0 ? (
-                                rooms.map(room => <option key={room.name} value={room.name}>{room.name}</option>)
+                            {allRooms.length > 0 ? (
+                                allRooms.map(room => <option key={room.name} value={room.name}>{room.name}</option>)
                             ) : (
                                 <option disabled>No rooms available to join</option>
                             )}
