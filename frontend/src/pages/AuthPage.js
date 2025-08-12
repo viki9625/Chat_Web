@@ -1,27 +1,24 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin
+import { GoogleLogin } from '@react-oauth/google';
 import './AuthPage.css';
 
 const AuthPage = () => {
-    const [isLoginView, setIsLoginView] = useState(true);
+    const [isLoginView, setIsLoginView] = useState(false); // Start on Sign Up view
     
-    const [identifier, setIdentifier] = useState('');
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
+    // State for all form fields
+    const [identifier, setIdentifier] = useState(''); // For login
+    const [username, setUsername] = useState('');   // For signup
+    const [email, setEmail] = useState('');         // For signup
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     
-    // Add 'googleLogin' back from the context
     const { login, signup, googleLogin } = useContext(AuthContext);
 
-    // This function handles the response from Google
     const handleGoogleSuccess = async (credentialResponse) => {
         setError('');
         try {
-            // Note: The logic to handle profile completion for new Google users
-            // is now in your AuthContext and AuthPage.js, so this should work.
-            await googleLogin(credentialResponse); 
+            await googleLogin(credentialResponse);
         } catch (err) {
             setError(err.message);
         }
@@ -33,7 +30,7 @@ const AuthPage = () => {
         try {
             if (isLoginView) {
                 await login(identifier, password);
-            } else {
+            } else { // This block will now run correctly for Sign Up
                 await signup(username, email, password);
             }
         } catch (err) {
@@ -41,6 +38,7 @@ const AuthPage = () => {
         }
     };
 
+    // This function toggles between the Login and Sign Up forms
     const toggleView = () => {
         setIsLoginView(!isLoginView);
         setError('');
@@ -57,7 +55,6 @@ const AuthPage = () => {
                 <div className="shape1"></div>
                 <div className="shape2"></div>
             </div>
-
             <div className="auth-wrapper">
                 <div className="auth-panel welcome-panel">
                     <h2>Welcome</h2>
@@ -66,13 +63,11 @@ const AuthPage = () => {
                         {isLoginView ? 'Sign Up' : 'Sign In'}
                     </button>
                 </div>
-
                 <div className="auth-panel form-panel">
+                    <h3>{isLoginView ? 'Sign In' : 'Create Account'}</h3>
                     <form onSubmit={handleSubmit}>
-                        <h3>{isLoginView ? 'Sign In' : 'Create Account'}</h3>
-                        
                         {!isLoginView && (
-                            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" required />
+                             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" required />
                         )}
                         
                         <input 
@@ -91,18 +86,14 @@ const AuthPage = () => {
                             {isLoginView ? 'Sign In' : 'Sign Up'}
                         </button>
                     </form>
-
-                    {/* --- GOOGLE LOGIN BUTTON ADDED BACK HERE --- */}
                     <div className="divider">OR</div>
                     <div className="google-login-container">
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => { setError('Google Login failed.'); }}
-                            theme="outline"
-                            size="large"
+                            theme="outline" size="large"
                             text={isLoginView ? "signin_with" : "signup_with"}
-                            shape="rectangular"
-                            logo_alignment="center"
+                            shape="rectangular" logo_alignment="center"
                         />
                     </div>
                      {isLoginView && <a href="#" className="forgot-password">forgot password?</a>}
