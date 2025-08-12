@@ -1,10 +1,105 @@
 .chat-page-container {
-  display: flex;
-  width: 90vw;
-  height: 90vh;
-  max-width: 1600px;
-  background-color: var(--background-color);
-  border-radius: 20px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-color: #12121c; /* Consistent dark background */
+    overflow: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Style the Sidebar to have a dark background */
+.sidebar {
+    width: 300px;
+    background-color: rgba(255, 255, 255, 0.05); /* Dark sidebar */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Style the ChatWindow to have a frosted glass effect */
+.chat-window {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(255, 255, 255, 0.08); /* Frosted glass effect */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fff;
+}
+
+.chat-window-placeholder {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    padding: 20px;
+}
+
+.chat-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+}
+
+.chat-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.message-list {
+    flex-grow: 1;
+    padding: 20px 30px;
+    overflow-y: auto;
+    background-color: transparent;
+}
+
+.message-input-form {
+    display: flex;
+    padding: 20px 30px;
+    align-items: center;
+    background-color: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.message-input-form input {
+    flex-grow: 1;
+    border: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px 20px;
+    font-size: 15px;
+    margin-right: 15px;
+    outline: none;
+    color: #fff;
+}
+
+.message-input-form input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.send-button {
+    background-color: #00a79d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.send-button:hover {
+    background-color: #00857d;
 }

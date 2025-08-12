@@ -133,34 +133,41 @@ def login_user(user_login: UserLogin):
         )
         
     return {"msg": "Login successful", "user": {"username": db_user["username"], "email": db_user["email"]}}
+
 @app.post("/google-login/")
 def google_login(data: GoogleLoginData):
     """
-    Checks a Google user. If they exist, log them in. 
-    If not, signal the frontend to complete the profile.
+    Handles user login/signup via Google.
+    If a user with the email exists, it logs them in (linking the account).
+    If not, it prompts for profile completion.
     """
     db_user = users_collection.find_one({"email": data.email})
     
-    # Case 1: User exists and signed up with Google before. Log them in.
-    if db_user and db_user.get("auth_provider") == "google":
+    # --- THIS IS THE NEW LOGIC ---
+    # If a user with that email already exists (no matter how they signed up),
+    # log them in successfully.
+    if db_user:
+        # Optional but recommended: Update the user to mark them as a Google user
+        # for future reference. This effectively links the accounts.
+        if not db_user.get("auth_provider"):
+            users_collection.update_one(
+                {"email": data.email},
+                {"$set": {"auth_provider": "google"}}
+            )
+        
+        # Log the user in
         return {
             "action": "login",
             "user": {"username": db_user["username"], "email": db_user["email"]}
         }
     
-    # Case 2: User exists but signed up with email/password. Deny Google login.
-    if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="This email is already registered with a password. Please log in using your password."
-        )
-
-    # Case 3: New user. Tell the frontend to show the profile completion form.
-    return {
-        "action": "complete_profile",
-        "email": data.email,
-        "suggested_username": data.username.replace(" ", "").lower()
-    }
+    # If the user is completely new, proceed to the profile completion step as before.
+    else:
+        return {
+            "action": "complete_profile",
+            "email": data.email,
+            "suggested_username": data.username.replace(" ", "").lower()
+        }
 
 @app.get("/users/")
 def list_users():
@@ -227,6 +234,25 @@ def accept_friend(req: FriendRequest):
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Friend request not found")
     return {"msg": "Friend request accepted"}
+
+@app.get("/friend-requests/pending/{username}")
+def get_pending_requests(username: str):
+    """Fetches all incoming friend requests for a user that are not yet accepted."""
+    requests = list(friends_collection.find(
+        {"to_user": username, "accepted": False}, 
+        {"_id": 0}
+    ))
+    return requests
+
+@app.post("/friend-decline/")
+def decline_friend(req: FriendRequest):
+    """Declines/rejects a friend request by deleting it."""
+    result = friends_collection.delete_one(
+        {"from_user": req.to_user, "to_user": req.from_user, "accepted": False}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Friend request not found to decline.")
+    return {"msg": "Friend request declined"}
 
 @app.get("/friends/{username}")
 def get_friends(username: str):
@@ -354,3 +380,4 @@ def join_room(room_name: str, request: JoinRoomRequest):
         return {"msg": f"User '{request.username}' successfully joined room '{room_name}'"}
     else:
         return {"msg": f"User '{request.username}' is already a member of room '{room_name}'"}
+    

@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
 import CreateRoomModal from '../components/CreateRoomModal';
 import './ChatPage.css';
+import FriendManagementModal from '../components/FriendManagementModal';
 
 const ChatPage = () => {
   const [users, setUsers] = useState([]);
@@ -13,6 +14,8 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user, ws } = useContext(AuthContext); // Get 'ws' from context
+  const [pendingRequests, setPendingRequests] = useState([]);
+  const [isFriendModalOpen, setIsFriendModalOpen] = useState(false);
 
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
@@ -27,6 +30,9 @@ const ChatPage = () => {
 
       const roomsResponse = await axios.get(`${backendUrl}/rooms/`);
       setRooms(roomsResponse.data.rooms || []);
+
+      const requestsResponse = await axios.get(`${backendUrl}/friend-requests/pending/${user.username}`);
+      setPendingRequests(requestsResponse.data || []);
     } catch (error) {
       console.error("Failed to fetch data:", error);
     }
@@ -81,24 +87,33 @@ const ChatPage = () => {
   };
   
   return (
-    <div className="chat-page-container">
-      {isModalOpen && <CreateRoomModal 
-        onClose={() => setIsModalOpen(false)}
-        onRoomCreated={fetchData}
-      />}
-      <Sidebar 
-        users={users} 
-        rooms={rooms}
-        onSelectChat={handleSelectChat} 
-        activeChat={activeChat}
-        onNewRoom={() => setIsModalOpen(true)}
-      />
-      <ChatWindow 
-        activeChat={activeChat} 
-        messages={messages} 
-        setMessages={setMessages} 
-      />
-    </div>
+<>
+  <div className="chat-page-container">
+      {isModalOpen && <CreateRoomModal /* ...props... */ />}
+      {isFriendModalOpen && <FriendManagementModal 
+          pendingRequests={pendingRequests}
+          onClose={() => setIsFriendModalOpen(false)}
+          onAction={() => {
+            fetchData(); // Refetch all data after an action
+            setIsFriendModalOpen(false); // Close modal on action
+     }}
+    />}
+    <Sidebar 
+      pendingRequests={pendingRequests.length}
+      onOpenFriendModal={() => setIsFriendModalOpen(true)}
+      users={users} 
+      rooms={rooms}
+      onSelectChat={handleSelectChat} 
+      activeChat={activeChat}
+      onNewRoom={() => setIsModalOpen(true)}
+    />
+    <ChatWindow 
+      activeChat={activeChat} 
+      messages={messages} 
+      setMessages={setMessages} 
+    />
+  </div>
+</>
   );
 };
 

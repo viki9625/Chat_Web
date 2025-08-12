@@ -1,29 +1,27 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google'; // Import GoogleLogin
 import './AuthPage.css';
 
 const AuthPage = () => {
-    const [view, setView] = useState('login');
+    const [isLoginView, setIsLoginView] = useState(true);
     
-    // State for all form fields
+    const [identifier, setIdentifier] = useState('');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [identifier, setIdentifier] = useState(''); // New state for login
     const [error, setError] = useState('');
     
+    // Add 'googleLogin' back from the context
     const { login, signup, googleLogin } = useContext(AuthContext);
 
+    // This function handles the response from Google
     const handleGoogleSuccess = async (credentialResponse) => {
         setError('');
         try {
-            const result = await googleLogin(credentialResponse);
-            if (result.action === 'complete_profile') {
-                setEmail(result.email);
-                setUsername(result.suggested_username);
-                setView('complete_google');
-            }
+            // Note: The logic to handle profile completion for new Google users
+            // is now in your AuthContext and AuthPage.js, so this should work.
+            await googleLogin(credentialResponse); 
         } catch (err) {
             setError(err.message);
         }
@@ -33,8 +31,8 @@ const AuthPage = () => {
         e.preventDefault();
         setError('');
         try {
-            if (view === 'login') {
-                await login(identifier, password); // Use identifier for login
+            if (isLoginView) {
+                await login(identifier, password);
             } else {
                 await signup(username, email, password);
             }
@@ -43,89 +41,72 @@ const AuthPage = () => {
         }
     };
 
-    const renderLoginView = () => (
-        <>
-            <h2>Welcome Back!</h2>
-            <p>Sign in to continue.</p>
-            <form onSubmit={handleSubmit}>
-                {/* Updated input for email or username */}
-                <input 
-                    type="text" 
-                    value={identifier} 
-                    onChange={(e) => setIdentifier(e.target.value)} 
-                    placeholder="Email or Username" 
-                    required 
-                />
-                <input 
-                    type="password" 
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
-                    placeholder="Password" 
-                    required 
-                />
-                {error && <p className="auth-error">{error}</p>}
-                <button type="submit" className="auth-button">Login</button>
-            </form>
-        </>
-    );
-
-    const renderSignupView = () => (
-        <>
-            <h2>Create Account</h2>
-            <p>Join us today!</p>
-            <form onSubmit={handleSubmit}>
-                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" required />
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
-                {error && <p className="auth-error">{error}</p>}
-                <button type="submit" className="auth-button">Sign Up</button>
-            </form>
-        </>
-    );
-    
-    const renderCompleteGoogleView = () => (
-         <>
-            <h2>Complete Your Profile</h2>
-            <p>Your email is confirmed via Google. Just set a username and password.</p>
-            <form onSubmit={handleSubmit}>
-                <input type="email" value={email} readOnly disabled />
-                <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Choose a username" required />
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a password" required autoFocus />
-                {error && <p className="auth-error">{error}</p>}
-                <button type="submit" className="auth-button">Create Account</button>
-            </form>
-        </>
-    );
-
-    const isInitialView = view === 'login' || view === 'signup';
+    const toggleView = () => {
+        setIsLoginView(!isLoginView);
+        setError('');
+        // Clear all form fields when toggling
+        setIdentifier('');
+        setUsername('');
+        setEmail('');
+        setPassword('');
+    };
 
     return (
         <div className="auth-container">
-            <div className="auth-box">
-                {view === 'login' && renderLoginView()}
-                {view === 'signup' && renderSignupView()}
-                {view === 'complete_google' && renderCompleteGoogleView()}
+            <div className="auth-background">
+                <div className="shape1"></div>
+                <div className="shape2"></div>
+            </div>
 
-                {isInitialView && (
-                    <>
-                        <div className="divider">OR</div>
-                        <div className="google-login-container">
-                            <GoogleLogin
-                                onSuccess={handleGoogleSuccess}
-                                onError={() => { setError('Google Login failed.'); }}
-                                theme="filled_blue"
-                                text={view === 'login' ? "signin_with" : "signup_with"}
-                                shape="rectangular"
-                            />
-                        </div>
-                        <p className="toggle-view">
-                            {view === 'login' ? "Don't have an account?" : "Already have an account?"}
-                            <span onClick={() => setView(view === 'login' ? 'signup' : 'login')}>
-                                {view === 'login' ? ' Sign Up' : ' Login'}
-                            </span>
-                        </p>
-                    </>
-                )}
+            <div className="auth-wrapper">
+                <div className="auth-panel welcome-panel">
+                    <h2>Welcome</h2>
+                    <p>Enter your personal details and start your journey with us.</p>
+                    <button className="panel-btn" onClick={toggleView}>
+                        {isLoginView ? 'Sign Up' : 'Sign In'}
+                    </button>
+                </div>
+
+                <div className="auth-panel form-panel">
+                    <form onSubmit={handleSubmit}>
+                        <h3>{isLoginView ? 'Sign In' : 'Create Account'}</h3>
+                        
+                        {!isLoginView && (
+                            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" required />
+                        )}
+                        
+                        <input 
+                            type="text" 
+                            value={isLoginView ? identifier : email} 
+                            onChange={(e) => isLoginView ? setIdentifier(e.target.value) : setEmail(e.target.value)} 
+                            placeholder={isLoginView ? "Username or Email" : "Email"}
+                            required 
+                        />
+                        
+                        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
+                        
+                        {error && <p className="auth-error">{error}</p>}
+                        
+                        <button type="submit" className="form-btn">
+                            {isLoginView ? 'Sign In' : 'Sign Up'}
+                        </button>
+                    </form>
+
+                    {/* --- GOOGLE LOGIN BUTTON ADDED BACK HERE --- */}
+                    <div className="divider">OR</div>
+                    <div className="google-login-container">
+                        <GoogleLogin
+                            onSuccess={handleGoogleSuccess}
+                            onError={() => { setError('Google Login failed.'); }}
+                            theme="outline"
+                            size="large"
+                            text={isLoginView ? "signin_with" : "signup_with"}
+                            shape="rectangular"
+                            logo_alignment="center"
+                        />
+                    </div>
+                     {isLoginView && <a href="#" className="forgot-password">forgot password?</a>}
+                </div>
             </div>
         </div>
     );
