@@ -30,6 +30,7 @@
   color: var(--text-primary);
 }
 
+/* This is the key property for the layout */
 .message-list {
   flex-grow: 1;
   padding: 20px 30px;

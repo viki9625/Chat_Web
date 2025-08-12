@@ -6,50 +6,34 @@ import './ChatWindow.css';
 
 const ChatWindow = ({ activeChat, messages, setMessages }) => {
   const [text, setText] = useState('');
-  const { user } = useContext(AuthContext);
+  const { user, ws } = useContext(AuthContext);
   const messagesEndRef = useRef(null);
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
-  const ws = new WebSocket(`${process.env.REACT_APP_WEBSOCKET_URL}/ws/${user.username}`);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(scrollToBottom, [messages]);
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
-    if (!text.trim() || !activeChat) return;
+    if (!text.trim() || !activeChat || !ws) return;
 
-    let messageData = {};
-    let url = '';
+    let messagePayload, url;
 
     if (activeChat.type === 'private') {
         url = `${backendUrl}/private-message/`;
-        messageData = { sender: user.username, receiver: activeChat.id, text };
-    } else if (activeChat.type === 'room') {
+        messagePayload = { sender: user.username, receiver: activeChat.id, text };
+    } else {
         url = `${backendUrl}/room-message/`;
-        messageData = { username: user.username, room: activeChat.id, text };
+        messagePayload = { username: user.username, room: activeChat.id, text };
     }
     
-    // Optimistic UI update
-    const optimisticMessage = activeChat.type === 'private'
-      ? { sender: user.username, receiver: activeChat.id, text, timestamp: new Date().toISOString() }
-      : { username: user.username, room: activeChat.id, text, timestamp: new Date().toISOString(), sender: user.username };
-    
+    const optimisticMessage = { ...messagePayload, timestamp: new Date().toISOString(), sender: user.username };
     setMessages(prev => [...prev, optimisticMessage]);
-    
-    // Send to WebSocket for real-time broadcast
-    ws.send(JSON.stringify({ type: activeChat.type, ...optimisticMessage }));
-    
     setText('');
-    
-    // Persist to DB
+
     try {
-      await axios.post(url, messageData);
+      await axios.post(url, messagePayload);
     } catch (error) {
       console.error("Failed to send message:", error);
-      // Optional: Add logic to remove the optimistic message on failure
     }
   };
 

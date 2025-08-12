@@ -1,11 +1,21 @@
 import os
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from typing import List, Dict, Optional
 from datetime import datetime
+from passlib.context import CryptContext
+
+# --- SECURITY (PASSWORD HASHING) ---
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.verify(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
 
 # Load environment variables
 load_dotenv()
@@ -16,7 +26,7 @@ app = FastAPI()
 # Enable CORS for frontend access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development
+    allow_origins=["http://localhost:3000"],  # For development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,9 +41,11 @@ friends_collection = db["friends"]
 rooms_collection = db["rooms"]
 
 # ------------------- MODELS -------------------
-class User(BaseModel):
+class UserCreate(BaseModel):
     username: str
-
+    email: EmailStr
+    password: str
+    
 class PublicMessage(BaseModel):
     username: str
     text: str
@@ -58,52 +70,89 @@ class RoomCreate(BaseModel):
 class JoinRoomRequest(BaseModel):
     username: str
 class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+class GoogleLoginData(BaseModel):
+    email: EmailStr
     username: str
 # ------------------- REAL-TIME CONNECTION MANAGER -------------------
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}  # username -> WebSocket
-
+        self.active_connections: Dict[str, WebSocket] = {}
     async def connect(self, websocket: WebSocket, username: str):
         await websocket.accept()
         self.active_connections[username] = websocket
-        print(f"{username} connected.")
-
     def disconnect(self, username: str):
         if username in self.active_connections:
             del self.active_connections[username]
-            print(f"{username} disconnected.")
-
     async def send_personal_message(self, message: dict, username: str):
         if username in self.active_connections:
             await self.active_connections[username].send_json(message)
-
     async def broadcast(self, message: dict):
         for connection in self.active_connections.values():
             await connection.send_json(message)
 
 manager = ConnectionManager()
-
 # ------------------- API ENDPOINTS -------------------
+@app.post("/signup/", status_code=status.HTTP_201_CREATED)
+def create_user(user: UserCreate):
+    """Creates a new user with a hashed password."""
+    # Check if username or email already exists
+    if users_collection.find_one({"username": user.username}):
+        raise HTTPException(status_code=409, detail="Username already registered")
+    if users_collection.find_one({"email": user.email}):
+        raise HTTPException(status_code=409, detail="Email already registered")
+
+    hashed_password = get_password_hash(user.password)
+    user_data = {
+        "username": user.username,
+        "email": user.email,
+        "hashed_password": hashed_password,
+        "created_at": datetime.utcnow()
+    }
+    users_collection.insert_one(user_data)
+    return {"msg": "User created successfully", "user": {"username": user.username, "email": user.email}}
+
 @app.post("/login/")
 def login_user(user_login: UserLogin):
-    """
-    Logs a user in by checking if they exist in the database.
-    """
-    user = users_collection.find_one({"username": user_login.username})
-    if not user:
+    """Logs a user in by verifying their email and password."""
+    db_user = users_collection.find_one({"email": user_login.email})
+    if not db_user or not verify_password(user_login.password, db_user["hashed_password"]):
         raise HTTPException(
-            status_code=404, 
-            detail="User not found. Please enter a valid username."
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
         )
-    return {"msg": "Login successful", "user": {"username": user_login.username}}
+    return {"msg": "Login successful", "user": {"username": db_user["username"], "email": db_user["email"]}}
 
-@app.post("/user/")
-def create_user(user: User):
-    if users_collection.find_one({"username": user.username}):
-        raise HTTPException(status_code=409, detail="User already exists")
-    users_collection.insert_one({"username": user.username, "created_at": datetime.utcnow()})
-    return {"msg": "User added", "user": user}
+@app.post("/google-login/")
+def google_login(data: GoogleLoginData):
+    """
+    Checks a Google user. If they exist, log them in. 
+    If not, signal the frontend to complete the profile.
+    """
+    db_user = users_collection.find_one({"email": data.email})
+    
+    # Case 1: User exists and signed up with Google before. Log them in.
+    if db_user and db_user.get("auth_provider") == "google":
+        return {
+            "action": "login",
+            "user": {"username": db_user["username"], "email": db_user["email"]}
+        }
+    
+    # Case 2: User exists but signed up with email/password. Deny Google login.
+    if db_user:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This email is already registered with a password. Please log in using your password."
+        )
+
+    # Case 3: New user. Tell the frontend to show the profile completion form.
+    return {
+        "action": "complete_profile",
+        "email": data.email,
+        "suggested_username": data.username.replace(" ", "").lower()
+    }
 
 @app.get("/users/")
 def list_users():

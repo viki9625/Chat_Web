@@ -1,6 +1,5 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import CreateRoomModal from './CreateRoomModal';
 import './Sidebar.css';
 
 // A simple placeholder for a logo or main icon
@@ -19,6 +18,7 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom }) => {
     
     return (
         <div className="sidebar">
+            {/* --- THIS HEADER SECTION IS THE FIX --- */}
             <div className="sidebar-header">
                 <AppLogo />
                 <button onClick={logout} className="logout-btn" title="Logout">
@@ -78,7 +78,6 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom }) => {
                     </div>
                 ))}
             </div>
-
         </div>
     );
 };
