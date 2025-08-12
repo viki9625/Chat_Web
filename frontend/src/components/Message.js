@@ -11,11 +11,12 @@ const Message = ({ message, chatType }) => {
   // Helper function to format the timestamp into HH:MM AM/PM
   const formatTimestamp = (isoString) => {
     if (!isoString) return '';
-    return new Date(isoString).toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
+    // Use Intl.DateTimeFormat for better localization and control
+    return new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
       hour12: true
-    });
+    }).format(new Date(isoString));
   };
 
   return (
