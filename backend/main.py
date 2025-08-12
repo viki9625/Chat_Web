@@ -386,3 +386,44 @@ def join_room(room_name: str, request: JoinRoomRequest):
     else:
         return {"msg": f"User '{request.username}' is already a member of room '{room_name}'"}
     
+@app.get("/chats/{username}")
+def get_user_chats(username: str):
+    """
+    Fetches all chats for a user, including the last message for each private chat.
+    """
+    # 1. Find all accepted friendships for the user
+    friends_cursor = friends_collection.find({
+        "$or": [{"from_user": username}, {"to_user": username}],
+        "accepted": True
+    })
+
+    chat_list = []
+    for friend_doc in friends_cursor:
+        # 2. Determine the friend's username
+        friend_username = friend_doc["to_user"] if friend_doc["from_user"] == username else friend_doc["from_user"]
+        
+        # 3. Find the last message between the user and this friend
+        last_message = messages_collection.find_one(
+            {
+                "type": "private",
+                "$or": [
+                    {"sender": username, "receiver": friend_username},
+                    {"sender": friend_username, "receiver": username}
+                ]
+            },
+            sort=[("timestamp", -1)] # Sort by timestamp descending and get the first one
+        )
+        
+        # 4. Get the friend's user details (like profile image)
+        friend_user_obj = users_collection.find_one({"username": friend_username})
+
+        chat_list.append({
+            "friend_username": friend_username,
+            "profile_image_url": friend_user_obj.get("profile_image_url") if friend_user_obj else None,
+            "last_message": {
+                "text": last_message.get("text") if last_message else "No messages yet.",
+                "timestamp": last_message.get("timestamp") if last_message else None
+            }
+        })
+    
+    return chat_list

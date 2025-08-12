@@ -2,13 +2,20 @@ import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import './Sidebar.css';
 
-const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingRequestsCount, onOpenFriendModal }) => {
+
+const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingRequestsCount, onOpenFriendModal, onDataRefresh }) => {
     const { user, logout } = useContext(AuthContext);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    
+    const formatPreviewTime = (isoString) => {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    };
 
     return (
         <div className="sidebar">
-            {/* --- Top Search and Action Bar --- */}
             <div className="sidebar-header">
                 <div className="search-bar">
                     <input type="text" placeholder="Search or start new chat" />
@@ -19,9 +26,14 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
                 </button>
             </div>
 
-            {/* --- User Profile Section with Settings Dropdown --- */}
             <div className="profile-section">
-                <div className="profile-avatar">{user.username.charAt(0).toUpperCase()}</div>
+                <div className="profile-avatar clickable" onClick={() => setIsUploadModalOpen(true)} title="Change Profile Picture">
+                    {user.profile_image_url ? (
+                        <img src={user.profile_image_url} alt={user.username} />
+                    ) : (
+                        user.username.charAt(0).toUpperCase()
+                    )}
+                </div>
                 <div className="profile-info">
                     <h4>{user.username}</h4>
                     <span>Available</span>
@@ -32,7 +44,7 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
                     </button>
                     {isDropdownOpen && (
                         <div className="profile-dropdown">
-                            <button onClick={logout}>
+                            <button onClick={() => { logout(); setIsDropdownOpen(false); }}>
                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M15.75 9l-3.75-3.75M15.75 9l3.75-3.75M15.75 9H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                                 Logout
                             </button>
@@ -41,26 +53,43 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
                 </div>
             </div>
 
-            {/* --- Chat Lists --- */}
             <div className="chat-list-container">
                 <div className="chat-list-header"><h4>Chats</h4></div>
                 <div className="chat-list">
-                    {users.map((u) => (
-                        <div key={u.username} className={`chat-item ${activeChat?.id === u.username ? 'active' : ''}`} onClick={() => onSelectChat({id: u.username, name: u.username, type: 'private'})}>
-                            <div className="avatar">{u.username.charAt(0).toUpperCase()}</div>
+                    {users.map((chat) => (
+                        <div key={chat.friend_username} className={`chat-item ${activeChat?.id === chat.friend_username ? 'active' : ''}`} onClick={() => onSelectChat({id: chat.friend_username, name: chat.friend_username, type: 'private'})}>
+                            <div className="avatar">
+                                {chat.profile_image_url ? (
+                                    <img src={chat.profile_image_url} alt={chat.friend_username} />
+                                ) : (
+                                    chat.friend_username.charAt(0).toUpperCase()
+                                )}
+                            </div>
                             <div className="chat-details">
-                                <div className="chat-name">{u.username}</div>
-                                <div className="chat-preview">Private Message</div>
+                                <div className="chat-name">{chat.friend_username}</div>
+                                <div className="chat-preview">{chat.last_message.text}</div>
+                            </div>
+                            <div className="chat-timestamp">
+                                {formatPreviewTime(chat.last_message.timestamp)}
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="chat-list-header"><h4>Group Chats</h4></div>
+                <div className="chat-list-header">
+                    <h4>Group Chats</h4>
+                    <button onClick={onNewRoom} className="add-room-btn">+</button>
+                </div>
                 <div className="chat-list">
                     {rooms.map((room) => (
                         <div key={room.name} className={`chat-item ${activeChat?.id === room.name ? 'active' : ''}`} onClick={() => onSelectChat({id: room.name, name: room.name, type: 'room'})}>
-                            <div className="avatar">#</div>
+                            <div className="avatar">
+                                {room.room_image_url ? (
+                                    <img src={room.room_image_url} alt={room.name} />
+                                ) : (
+                                    '#'
+                                )}
+                            </div>
                             <div className="chat-details">
                                 <div className="chat-name">{room.name}</div>
                                 <div className="chat-preview">{room.members.length} members</div>

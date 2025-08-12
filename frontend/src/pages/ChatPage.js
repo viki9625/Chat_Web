@@ -5,6 +5,7 @@ import Sidebar from '../components/Sidebar';
 import ChatWindow from '../components/ChatWindow';
 import CreateRoomModal from '../components/CreateRoomModal';
 import FriendManagementModal from '../components/FriendManagementModal';
+import RoomManagementModal from '../components/RoomManagementModal';
 import './ChatPage.css';
 
 const ChatPage = () => {
@@ -22,18 +23,17 @@ const ChatPage = () => {
 const fetchData = useCallback(async () => {
     if (!user) return;
     try {
-      // Fetch accepted friends to display in the 'Chats' list
-      const friendsResponse = await axios.get(`${backendUrl}/friends/${user.username}`);
-      const friendDocs = friendsResponse.data || [];
-      const friendUsernames = friendDocs.map(doc => doc.from_user === user.username ? doc.to_user : doc.from_user);
-      const friendsList = friendUsernames.map(name => ({ username: name }));
-      setUsers(friendsList);
+      // --- THIS IS THE UPDATED PART ---
+      // Call the new endpoint that includes last message data
+      const chatsResponse = await axios.get(`${backendUrl}/chats/${user.username}`);
+      setUsers(chatsResponse.data || []); // The 'users' state will now hold the full chat objects
 
-      // Fetch all available rooms
+      // --- END OF UPDATE ---
+
+      // Fetch rooms and pending requests as before
       const roomsResponse = await axios.get(`${backendUrl}/rooms/`);
       setRooms(roomsResponse.data.rooms || []);
 
-      // --- THIS IS THE CORRECTED LINE ---
       const requestsResponse = await axios.get(`${backendUrl}/friend-requests/pending/${user.username}`);
       setPendingRequests(requestsResponse.data || []);
 
@@ -43,7 +43,6 @@ const fetchData = useCallback(async () => {
       }
     }
   }, [user, backendUrl]);
-
     useEffect(() => {
         fetchData();
     }, [fetchData]);
