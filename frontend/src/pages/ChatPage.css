@@ -42,7 +42,7 @@
 }
 
 .chat-header {
-    padding: 20px 30px;
+    /* padding: 20px 20px; */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     align-items: center;
@@ -102,4 +102,44 @@
 
 .send-button:hover {
     background-color: #00857d;
+}
+.chat-page-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  background-color: #111b21;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+/* Desktop Styles */
+@media (min-width: 769px) {
+    .chat-page-container {
+        width: 95vw;
+        height: 95vh;
+        max-width: 1600px;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Mobile Responsive Logic */
+@media (max-width: 768px) {
+    /* By default, hide the chat window and show the sidebar */
+    .chat-page-container.show-sidebar .chat-window {
+        display: none;
+    }
+    .chat-page-container.show-sidebar .sidebar {
+        display: flex;
+    }
+
+    /* When a chat is active, hide the sidebar and show the chat window */
+    .chat-page-container.show-chat-window .sidebar {
+        display: none;
+    }
+    .chat-page-container.show-chat-window .chat-window {
+        display: flex;
+    }
 }

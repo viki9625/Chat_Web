@@ -213,14 +213,25 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* --- THIS SECTION CONTAINS THE FIX --- */
 .chat-details {
   flex-grow: 1;
   overflow: hidden;
+  /* Add these properties to fix the wrapping issue */
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
+/* --- END OF FIX --- */
+
 .chat-name {
   font-weight: 500;
   color: #e9edef;
   margin-bottom: 4px;
+  /* Ensure this also doesn't wrap unexpectedly */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .chat-preview {
   font-size: 14px;
@@ -235,4 +246,13 @@
     white-space: nowrap;
     align-self: flex-start;
     padding-top: 2px;
+}
+/* --- Add this to the BOTTOM of Sidebar.css --- */
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100vw;
+        height: 100vh;
+        border-right: none;
+    }
 }

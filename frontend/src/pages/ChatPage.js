@@ -23,8 +23,8 @@ const ChatPage = () => {
     const fetchData = useCallback(async () => {
         if (!user) return;
         try {
-            const chatsResponse = await axios.get(`${backendUrl}/chats/${user.username}`);
-            setUsers(chatsResponse.data || []);
+            const usersResponse = await axios.get(`${backendUrl}/users/`);
+            setUsers(usersResponse.data.filter(u => u.username !== user.username) || []);
 
             const joinedRoomsResponse = await axios.get(`${backendUrl}/rooms/${user.username}`);
             setJoinedRooms(joinedRoomsResponse.data.rooms || []);
@@ -84,9 +84,12 @@ const ChatPage = () => {
     const handleSelectChat = (chat) => {
         setActiveChat(chat);
     };
+
+    // This class controls which view is shown on mobile
+    const containerClass = `chat-page-container ${activeChat ? 'show-chat-window' : 'show-sidebar'}`;
     
     return (
-        <div className="chat-page-container">
+        <div className={containerClass}>
             {isRoomModalOpen && <RoomManagementModal 
                 allRooms={allRooms}
                 onClose={() => setIsRoomModalOpen(false)}
@@ -113,7 +116,8 @@ const ChatPage = () => {
             <ChatWindow 
                 activeChat={activeChat} 
                 messages={messages} 
-                setMessages={setMessages} 
+                setMessages={setMessages}
+                onBack={() => setActiveChat(null)} // Pass the back function
             />
         </div>
     );

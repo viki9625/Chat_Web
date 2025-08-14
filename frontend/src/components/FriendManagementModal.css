@@ -27,15 +27,18 @@
     text-align: left;
 }
 
+/* --- THIS IS THE FIX --- */
 .request-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 15px;
     border-radius: 8px;
-    background-color: var(--secondary-bg);
+    background-color: #e9edef; /* Using a light background */
     margin-bottom: 10px;
+    color: #111b21; /* Set a dark text color for visibility */
 }
+/* --- END OF FIX --- */
 
 .request-actions {
     display: flex;
@@ -58,6 +61,6 @@
 }
 
 .no-requests {
-    color: var(--text-secondary);
+    color: #aebac1;
     margin-top: 40px;
 }
