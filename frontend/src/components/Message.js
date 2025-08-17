@@ -8,7 +8,7 @@ const Message = ({ message, chatType }) => {
   const isSentByCurrentUser = sender === user.username;
   const messageClass = isSentByCurrentUser ? 'sent' : 'received';
 
-  // Helper function to format the timestamp into HH:MM AM/PM
+  // --- IMPROVED HELPER FUNCTION ---
   const formatTimestamp = (isoString) => {
     if (!isoString) return '';
     // Use Intl.DateTimeFormat for better localization and control

@@ -4,12 +4,11 @@ import { GoogleLogin } from '@react-oauth/google';
 import './AuthPage.css';
 
 const AuthPage = () => {
-    const [isLoginView, setIsLoginView] = useState(false); // Start on Sign Up view
+    const [isLoginView, setIsLoginView] = useState(true);
     
-    // State for all form fields
-    const [identifier, setIdentifier] = useState(''); // For login
-    const [username, setUsername] = useState('');   // For signup
-    const [email, setEmail] = useState('');         // For signup
+    const [identifier, setIdentifier] = useState('');
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     
@@ -30,7 +29,7 @@ const AuthPage = () => {
         try {
             if (isLoginView) {
                 await login(identifier, password);
-            } else { // This block will now run correctly for Sign Up
+            } else {
                 await signup(username, email, password);
             }
         } catch (err) {
@@ -38,11 +37,9 @@ const AuthPage = () => {
         }
     };
 
-    // This function toggles between the Login and Sign Up forms
     const toggleView = () => {
         setIsLoginView(!isLoginView);
         setError('');
-        // Clear all form fields when toggling
         setIdentifier('');
         setUsername('');
         setEmail('');
@@ -55,19 +52,26 @@ const AuthPage = () => {
                 <div className="shape1"></div>
                 <div className="shape2"></div>
             </div>
+
             <div className="auth-wrapper">
+                {/* --- THIS IS THE UPDATED PANEL --- */}
                 <div className="auth-panel welcome-panel">
+                    <div className="welcome-logo">
+                        <img src="https://img.icons8.com/plasticine/512/imessage.png" alt="FusionChat Logo" />
+                    </div>
                     <h2>Welcome</h2>
                     <p>Enter your personal details and start your journey with us.</p>
                     <button className="panel-btn" onClick={toggleView}>
                         {isLoginView ? 'Sign Up' : 'Sign In'}
                     </button>
                 </div>
+
                 <div className="auth-panel form-panel">
-                    <h3>{isLoginView ? 'Sign In' : 'Create Account'}</h3>
                     <form onSubmit={handleSubmit}>
+                        <h3>{isLoginView ? 'Sign In' : 'Create Account'}</h3>
+                        
                         {!isLoginView && (
-                             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" required />
+                            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Username" required />
                         )}
                         
                         <input 
@@ -86,14 +90,17 @@ const AuthPage = () => {
                             {isLoginView ? 'Sign In' : 'Sign Up'}
                         </button>
                     </form>
+
                     <div className="divider">OR</div>
                     <div className="google-login-container">
                         <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => { setError('Google Login failed.'); }}
-                            theme="outline" size="large"
+                            theme="outline"
+                            size="large"
                             text={isLoginView ? "signin_with" : "signup_with"}
-                            shape="rectangular" logo_alignment="center"
+                            shape="rectangular"
+                            logo_alignment="center"
                         />
                     </div>
                      {isLoginView && <a href="#" className="forgot-password">forgot password?</a>}

@@ -31,24 +31,19 @@ const ChatWindow = ({ activeChat, messages, setMessages, onBack }) => {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
-  // New useEffect to handle the Escape key press for backing out of a chat
   useEffect(() => {
     const handleKeyDown = (event) => {
         if (event.key === 'Escape') {
             onBack();
         }
     };
-
-    // Add event listener only when a chat is active
     if (activeChat) {
         document.addEventListener('keydown', handleKeyDown);
     }
-
-    // Cleanup function to remove the event listener
     return () => {
         document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [activeChat, onBack]); // Dependencies ensure the effect is managed correctly
+  }, [activeChat, onBack]);
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -86,7 +81,9 @@ const ChatWindow = ({ activeChat, messages, setMessages, onBack }) => {
   if (!activeChat) {
     return (
         <div className="chat-window-placeholder">
+            <img src="https://img.icons8.com/plasticine/512/imessage.png" alt="Start chatting" className="placeholder-gif" />
             <h2>Select a conversation to begin</h2>
+            <p>You can start a new chat by selecting a user or group from the list on the left.</p>
         </div>
     );
   }

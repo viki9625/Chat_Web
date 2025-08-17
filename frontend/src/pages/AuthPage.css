@@ -10,7 +10,6 @@
     font-family: 'Poppins', sans-serif;
 }
 
-/* Animated background shapes */
 .auth-background .shape1,
 .auth-background .shape2 {
     position: absolute;
@@ -48,11 +47,10 @@
 .auth-wrapper {
     display: flex;
     width: 800px;
-    height: 550px; /* Slightly taller to accommodate Google button */
+    height: 550px;
     z-index: 1;
 }
 
-/* Glassmorphism Panel Style */
 .auth-panel {
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(15px);
@@ -73,6 +71,13 @@
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
 }
+
+/* --- NEW STYLES FOR THE LOGO --- */
+.welcome-logo img {
+    width: 60%;
+    height: 90%;
+}
+/* --- END OF NEW STYLES --- */
 
 .welcome-panel h2 {
     font-size: 36px;
@@ -167,7 +172,6 @@
   text-align: center;
 }
 
-/* --- STYLES FOR GOOGLE BUTTON AND DIVIDER --- */
 .divider {
     display: flex;
     align-items: center;
