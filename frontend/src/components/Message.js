@@ -8,14 +8,17 @@ const Message = ({ message, chatType }) => {
   const isSentByCurrentUser = sender === user.username;
   const messageClass = isSentByCurrentUser ? 'sent' : 'received';
 
-  // --- IMPROVED HELPER FUNCTION ---
+  // --- THIS IS THE CORRECTED FUNCTION ---
+  // It correctly converts the UTC time from the database to Indian Standard Time.
   const formatTimestamp = (isoString) => {
     if (!isoString) return '';
-    // Use Intl.DateTimeFormat for better localization and control
-    return new Intl.DateTimeFormat('en-US', {
+    // The 'new Date()' constructor reads the UTC ISO string.
+    // Intl.DateTimeFormat then formats it into the specified timezone.
+    return new Intl.DateTimeFormat('en-IN', { // Use Indian English locale
       hour: 'numeric',
       minute: 'numeric',
-      hour12: true
+      hour12: true,
+      timeZone: 'Asia/Kolkata' // Explicitly set the timezone to IST
     }).format(new Date(isoString));
   };
 
