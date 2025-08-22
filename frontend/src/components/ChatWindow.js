@@ -29,8 +29,12 @@ const ChatWindow = ({ activeChat, messages, setMessages, onBack }) => {
   const messagesEndRef = useRef(null);
   const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  // auto-scroll to bottom when messages update
+  useEffect(() => { 
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); 
+  }, [messages]);
 
+  // allow Esc key to go back
   useEffect(() => {
     const handleKeyDown = (event) => {
         if (event.key === 'Escape') {
@@ -49,28 +53,31 @@ const ChatWindow = ({ activeChat, messages, setMessages, onBack }) => {
     e.preventDefault();
     if (!text.trim() || !activeChat || !ws) return;
 
-    const messagePayload = {
-        sender: user.username,
-        text: text.trim(),
-        timestamp: new Date().toISOString()
-    };
-    
     let apiPayload, wsPayload, url;
 
     if (activeChat.type === 'private') {
         url = `${backendUrl}/private-message/`;
         apiPayload = { sender: user.username, receiver: activeChat.id, text: text.trim() };
-        wsPayload = { type: 'private', ...apiPayload };
+        wsPayload = { event: 'private_message', data: apiPayload }; 
     } else {
         url = `${backendUrl}/room-message/`;
-        apiPayload = { username: user.username, room: activeChat.id, text: text.trim() };
-        wsPayload = { type: 'room', ...apiPayload };
+        apiPayload = { sender: user.username, room: activeChat.id, text: text.trim() };
+        wsPayload = { event: 'room_message', data: apiPayload };   
     }
-    
+
+    // ✅ Optimistically update messages immediately
+    const optimisticMessage = {
+        ...apiPayload,
+        timestamp: new Date().toISOString(),
+        _tempId: Math.random().toString(36).substr(2, 9)
+    };
+    setMessages((prev) => [...prev, optimisticMessage]);
+
+    // ✅ Send via WebSocket
     ws.send(JSON.stringify(wsPayload));
-    setMessages(prev => [...prev, messagePayload]);
     setText('');
 
+    // Save to DB via REST (non-blocking)
     try {
       await axios.post(url, apiPayload);
     } catch (error) {
@@ -106,7 +113,7 @@ const ChatWindow = ({ activeChat, messages, setMessages, onBack }) => {
                 }
                 const separatorText = formatDateSeparator(msg.timestamp);
                 return (
-                    <React.Fragment key={msg.timestamp + index}>
+                    <React.Fragment key={msg._id || msg._tempId || msg.timestamp + index}>
                         {showDateSeparator && separatorText && (
                             <div className="date-separator"><span>{separatorText}</span></div>
                         )}

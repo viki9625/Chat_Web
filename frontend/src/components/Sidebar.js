@@ -6,6 +6,11 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
     const { user, logout } = useContext(AuthContext);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     
+    const formatPreviewTime = (isoString) => {
+        if (!isoString) return '';
+        return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    };
+
     return (
         <div className="sidebar">
             <div className="sidebar-header">
@@ -44,15 +49,23 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
             <div className="chat-list-container">
                 <div className="chat-list-header"><h4>Chats</h4></div>
                 <div className="chat-list">
-                    {/* --- THIS IS THE UPDATED PART --- */}
-                    {users.map((u) => (
-                        <div key={u.username} className={`chat-item ${activeChat?.id === u.username ? 'active' : ''}`} onClick={() => onSelectChat({id: u.username, name: u.username, type: 'private'})}>
+                    {users.map((chat) => (
+                        <div 
+                          key={chat.friend_username} 
+                          className={`chat-item ${activeChat?.id === chat.friend_username ? 'active' : ''}`} 
+                          onClick={() => onSelectChat({id: chat.friend_username, name: chat.friend_username, type: 'private'})}
+                        >
                             <div className="avatar">
-                                {u.username.charAt(0).toUpperCase()}
+                                {chat.friend_username.charAt(0).toUpperCase()}
                             </div>
                             <div className="chat-details">
-                                <div className="chat-name">{u.username}</div>
-                                <div className="chat-preview">Click to chat</div>
+                                <div className="chat-name">{chat.friend_username}</div>
+                                <div className="chat-bottom-row">
+                                    <div className="chat-preview">{chat.last_message.text}</div>
+                                    <div className="chat-timestamp">
+                                        {formatPreviewTime(chat.last_message.timestamp)}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -64,13 +77,26 @@ const Sidebar = ({ users, rooms, onSelectChat, activeChat, onNewRoom, pendingReq
                 </div>
                 <div className="chat-list">
                     {rooms.map((room) => (
-                        <div key={room.name} className={`chat-item ${activeChat?.id === room.name ? 'active' : ''}`} onClick={() => onSelectChat({id: room.name, name: room.name, type: 'room'})}>
-                            <div className="avatar">
-                                {'#'}
-                            </div>
+                        <div 
+                          key={room.name} 
+                          className={`chat-item ${activeChat?.id === room.name ? 'active' : ''}`} 
+                          onClick={() => onSelectChat({id: room.name, name: room.name, type: 'room'})}
+                        >
+                            <div className="avatar">{'#'}</div>
                             <div className="chat-details">
                                 <div className="chat-name">{room.name}</div>
-                                <div className="chat-preview">{room.members.length} members</div>
+                                <div className="chat-bottom-row">
+                                    <div className="chat-preview">
+                                        {room.last_message && room.last_message.sender ? (
+                                            <span><strong>{room.last_message.sender}:</strong> {room.last_message.text}</span>
+                                        ) : (
+                                            <span>{room.members.length} members</span>
+                                        )}
+                                    </div>
+                                    <div className="chat-timestamp">
+                                        {formatPreviewTime(room.last_message?.timestamp)}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ))}

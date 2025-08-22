@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from typing import List, Dict, Optional
 from datetime import datetime
 from passlib.context import CryptContext
+from fastapi.encoders import jsonable_encoder
 
 # --- SECURITY (PASSWORD HASHING) ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -26,7 +27,7 @@ app = FastAPI()
 # Enable CORS for frontend access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development
+    allow_origins=["http://localhost:3000"],  # For development
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -189,8 +190,11 @@ def send_public_message(message: PublicMessage):
 async def send_private_message(message: PrivateMessage):
     sender = users_collection.find_one({"username": message.sender})
     receiver = users_collection.find_one({"username": message.receiver})
+    
     if not sender or not receiver:
         raise HTTPException(status_code=404, detail="Sender or receiver not found")
+    
+    # Build the message
     msg_data = {
         "type": "private",
         "sender": message.sender,
@@ -199,10 +203,24 @@ async def send_private_message(message: PrivateMessage):
         "timestamp": datetime.utcnow(),
         "read_by": [message.sender]
     }
-    messages_collection.insert_one(msg_data)
+    
+    # Insert into MongoDB
+    result = messages_collection.insert_one(msg_data)
+    
+    # Add the ID as a string (so it's JSON serializable)
+    msg_data["id"] = str(result.inserted_id)
+    
+    # Remove MongoDB's _id if present (to be safe)
+    if "_id" in msg_data:
+        del msg_data["_id"]
+    
     # Send real-time message if receiver is online
-    await manager.send_personal_message({"event": "private_message", "data": msg_data}, message.receiver)
-    return {"msg": "Private message sent"}
+    await manager.send_personal_message(
+        {"event": "private_message", "data": jsonable_encoder(msg_data)},
+        message.receiver
+    )
+    
+    return {"msg": "Private message sent", "message": jsonable_encoder(msg_data)}
 
 @app.get("/private-messages/{receiver}")
 def get_private_messages(receiver: str, sender: Optional[str] = None):

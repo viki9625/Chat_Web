@@ -1,6 +1,9 @@
 .sidebar {
-  width: 340px;
-  background-color: rgba(255, 255, 255, 0.05); 
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 290px !important;
+  flex: 0 0 280px !important;
+  background-color: rgba(255, 255, 255, 0.05);
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
@@ -8,169 +11,170 @@
 }
 
 .sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 15px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
+
 .search-bar {
-    flex-grow: 1;
+  flex-grow: 1;
 }
 .search-bar input {
-    width: 100%;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.08);
-    font-size: 15px;
-    box-sizing: border-box;
-    color: #fff;
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.08);
+  font-size: 15px;
+  box-sizing: border-box;
+  color: #fff;
 }
 .search-bar input::placeholder {
-    color: #aebac1;
+  color: #aebac1;
 }
+
 .add-friend-btn {
-    background: transparent;
-    border: none;
-    color: #aebac1;
-    border-radius: 50%;
-    width: 38px;
-    height: 38px;
-    flex-shrink: 0;
-    cursor: pointer;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s ease;
+  background: transparent;
+  border: none;
+  color: #aebac1;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
 }
 .add-friend-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 .notification-dot {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    width: 8px;
-    height: 8px;
-    background-color: #e74c3c;
-    border-radius: 50%;
-    border: 1px solid #1a242d;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  background-color: #e74c3c;
+  border-radius: 50%;
+  border: 1px solid #1a242d;
 }
 
 .profile-section {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    position: relative;
+  display: flex;
+  align-items: center;
+  padding: 20px;
+  position: relative;
 }
 .profile-info {
-    flex-grow: 1; 
-    margin-left: 15px;
+  flex-grow: 1; 
+  margin-left: 15px;
 }
 .profile-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #333;
-    color: white;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    overflow: hidden;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #333;
+  color: white;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
 }
 .profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .profile-info h4 {
-    margin: 0 0 5px 0;
-    font-size: 16px;
+  margin: 0 0 5px 0;
+  font-size: 16px;
 }
 .profile-info span {
-    font-size: 13px;
-    color: var(--accent-color);
-    font-weight: 500;
+  font-size: 13px;
+  color: var(--accent-color);
+  font-weight: 500;
 }
+
 .settings-container {
-    position: relative;
+  position: relative;
 }
 .settings-btn {
-    background: transparent;
-    border: none;
-    color: #aebac1;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #aebac1;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
 }
 .settings-btn:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
 }
 .profile-dropdown {
-    position: absolute;
-    top: 40px;
-    right: 0;
-    background-color: #2a3942;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    z-index: 10;
-    overflow: hidden;
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background-color: #2a3942;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 10;
+  overflow: hidden;
 }
 .profile-dropdown button {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: none;
-    border: none;
-    color: #e9edef;
-    padding: 12px 20px;
-    width: 100%;
-    text-align: left;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  color: #e9edef;
+  padding: 12px 20px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
 }
 .profile-dropdown button:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
 .chat-list-container {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 0 10px;
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 0 10px;
 }
 .chat-list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 10px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 10px 10px;
 }
 .chat-list-header h4 {
-    margin: 0;
-    font-size: 14px;
-    color: #aebac1;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  margin: 0;
+  font-size: 14px;
+  color: #aebac1;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 .chat-list-header .add-room-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    font-size: 20px;
-    cursor: pointer;
-    color: #aebac1;
-    line-height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  color: #aebac1;
+  line-height: 24px;
 }
-.chat-list {
-  /* No specific styles needed */
-}
+
 .chat-item {
   display: flex;
   align-items: center;
@@ -178,6 +182,7 @@
   cursor: pointer;
   border-radius: 8px;
   margin-bottom: 2px;
+  transition: background-color 0.2s ease;
 }
 .chat-item:hover {
   background-color: rgba(255, 255, 255, 0.08);
@@ -186,13 +191,15 @@
   background-color: var(--accent-color);
 }
 .chat-item.active .chat-name,
-.chat-item.active .chat-preview {
-    color: white;
+.chat-item.active .chat-preview,
+.chat-item.active .chat-timestamp {
+  color: white;
 }
 .chat-item.active .avatar {
-    background-color: white;
-    color: var(--accent-color);
+  background-color: white;
+  color: var(--accent-color);
 }
+
 .avatar {
   width: 45px;
   height: 45px;
@@ -209,50 +216,48 @@
   overflow: hidden;
 }
 .avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-/* --- THIS SECTION CONTAINS THE FIX --- */
+/* --- FIXED CHAT DETAILS --- */
 .chat-details {
   flex-grow: 1;
+  min-width: 0; /* allows ellipsis to work in flexbox */
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  /* Add these properties to fix the wrapping issue */
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
-/* --- END OF FIX --- */
 
 .chat-name {
   font-weight: 500;
   color: #e9edef;
   margin-bottom: 4px;
-  /* Ensure this also doesn't wrap unexpectedly */
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+.chat-bottom-row {
+  display: flex;
+  align-items: center;
+  min-width: 0; /* needed for ellipsis */
+}
+
 .chat-preview {
   font-size: 14px;
   color: #aebac1;
-  white-space: nowrap;
+  flex-grow: 1;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.chat-timestamp {
-    font-size: 12px;
-    color: #aebac1;
-    white-space: nowrap;
-    align-self: flex-start;
-    padding-top: 2px;
-}
-/* --- Add this to the BOTTOM of Sidebar.css --- */
 
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100vw;
-        height: 100vh;
-        border-right: none;
-    }
+.chat-timestamp {
+  font-size: 12px;
+  color: #aebac1;
+  white-space: nowrap;
+  margin-left: 10px;
+  flex-shrink: 0;
 }
