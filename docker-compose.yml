@@ -1,16 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB Database Service
-  db:
-    image: mongo:latest
-    container_name: chat_mongo_db
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    restart: unless-stopped
-
   # Backend Service (FastAPI)
   backend:
     build: ./backend
@@ -18,12 +8,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app # Mounts local code for live-reloading during development
+      - ./backend:/app  # Mounts local code (good for dev, remove in prod if not needed)
     environment:
-      # Use the service name 'db' as the hostname for the database
-      - DATABASE_URL=mongodb://db:27017/
-    depends_on:
-      - db
+      - DATABASE_URL=mongodb+srv://vikram:Vroy2005@chat.9xlbtw3.mongodb.net/?retryWrites=true&w=majority&appName=Chat
     restart: unless-stopped
 
   # Frontend Service (React + Nginx)
@@ -31,11 +18,7 @@ services:
     build: ./frontend
     container_name: chat_frontend
     ports:
-      - "80:80" # Map host port 3000 to Nginx container port 80
+      - "80:80"
     depends_on:
       - backend
     restart: unless-stopped
-
-volumes:
-
-  mongo_data:
