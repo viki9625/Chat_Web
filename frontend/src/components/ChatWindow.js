@@ -65,6 +65,9 @@ const ChatWindow = ({ activeChat, messages, setMessages, onBack }) => {
         wsPayload = { event: 'room_message', data: apiPayload };   
     }
 
+    console.log("API Payload:", apiPayload);
+    console.log("WS Payload:", wsPayload);
+
     // ✅ Optimistically update messages immediately
     const optimisticMessage = {
         ...apiPayload,
