@@ -57,11 +57,11 @@ const ChatWindow = ({ activeChat, messages, setMessages, onBack }) => {
 
     if (activeChat.type === 'private') {
         url = `${backendUrl}/private-message/`;
-        apiPayload = { sender: user.username, receiver: activeChat.id, text: text.trim() };
+        apiPayload = { sender: user.username, receiver: activeChat.id, text: text.trim(), type: 'private' };
         wsPayload = { event: 'private_message', data: apiPayload }; 
     } else {
         url = `${backendUrl}/room-message/`;
-        apiPayload = { sender: user.username, room: activeChat.id, text: text.trim() };
+        apiPayload = { sender: user.username, room: activeChat.id, text: text.trim(), type: 'room' };
         wsPayload = { event: 'room_message', data: apiPayload };   
     }
 
