@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 from datetime import datetime
 from passlib.context import CryptContext
 from fastapi.encoders import jsonable_encoder
-
+from prometheus_fastapi_instrumentator import Instrumentator
 # --- SECURITY (PASSWORD HASHING) ---
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -23,6 +23,9 @@ load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 app = FastAPI()
+
+
+Instrumentator().instrument(app).expose(app)
 
 # Enable CORS for frontend access
 app.add_middleware(

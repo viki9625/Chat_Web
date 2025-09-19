@@ -8,7 +8,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app  # Mounts local code (good for dev, remove in prod if not needed)
+      - ./backend:/app
     environment:
       - DATABASE_URL=mongodb+srv://vikram:Vroy2005@chat.9xlbtw3.mongodb.net/?retryWrites=true&w=majority&appName=Chat
     restart: unless-stopped
@@ -22,3 +22,42 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend
+      - cadvisor
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+  # cAdvisor (Container Monitoring)
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+
+volumes:
+  grafana-storage:
